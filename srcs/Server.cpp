@@ -1,11 +1,4 @@
 #include "../includes/Server.hpp"
-#include <stdexcept>
-#include <cstring>
-#include <unistd.h>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <iostream>
 
 Server::Server(int port, const std::string& password)
 	: _serverFd(-1), _password(password)
@@ -144,7 +137,6 @@ void Server::removeClient(int clientFd)
 
 Server::~Server()
 {
-	// Fechar e destruir clientes
 	for (std::map<int, Client*>::iterator it = _clients.begin();
 		it != _clients.end(); ++it)
 	{
@@ -152,8 +144,6 @@ Server::~Server()
 		delete it->second;
 	}
 	_clients.clear();
-
-	// Fechar socket do servidor
 	if (_serverFd >= 0)
 		close(_serverFd);
 }

@@ -3,6 +3,13 @@
 #include <vector>
 #include <poll.h>
 #include <map>
+#include <stdexcept>
+#include <cstring>
+#include <unistd.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <iostream>
 #include "Client.hpp"
 
 class Server
@@ -23,6 +30,7 @@ class Server
 		Server(int port, const std::string& password);
 		~Server();
 		void run();
+		
 };
 
 #endif
