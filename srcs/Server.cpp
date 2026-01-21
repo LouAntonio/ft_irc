@@ -1,10 +1,17 @@
 #include "../includes/Server.hpp"
 
+void Server::handler(int signal)
+{
+	(void)signal;
+	std::cout << "Server closed by signal: " << signal << std::endl;
+}
+
 Server::Server(int port, const std::string& password)
 	: _serverFd(-1), _password(password)
 {
+	if(port > 65535 || port < 1024)
+		throw std::invalid_argument("<port> must be between 1024 and 65535");
 	setupSocket(port);
-
 	struct pollfd pfd;
 	pfd.fd = _serverFd;
 	pfd.events = POLLIN;
@@ -39,12 +46,13 @@ void Server::setupSocket(int port)
 
 void Server::run()
 {
+	signal(SIGINT, handler); //^C
+	signal(SIGQUIT, handler); // "^\" ou ^|
+	signal(SIGTSTP, handler); // ^Z
 	while (true)
 	{
-		int ret = poll(&_pollfds[0], _pollfds.size(), -1);
-		if (ret < 0)
-			throw std::runtime_error("poll() failed");
-
+		if(poll(&_pollfds[0], _pollfds.size(), -1) == -1)
+			break;
 		for (size_t i = 0; i < _pollfds.size(); ++i)
 		{
 			if (_pollfds[i].revents & POLLIN)
@@ -91,7 +99,6 @@ void Server::receiveData(int clientFd)
 		removeClient(clientFd);
 		return;
 	}
-
 	_clients[clientFd]->recvBuffer.append(buffer, bytes);
 }
 
