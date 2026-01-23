@@ -8,6 +8,7 @@ class	Client
 		int		fd;
 		std::string	recvBuffer;
 		std::string	sendBuffer;
+		bool		auth;
 
 		Client(int fd);
 		~Client();
