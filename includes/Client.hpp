@@ -11,6 +11,7 @@ class	Client
 
 		Client(int fd);
 		~Client();
+		int getClientfd() const;
 };
 
 #endif

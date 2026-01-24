@@ -1,20 +1,25 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
+// contains necessary libraries
 #include <vector>
-#include <poll.h>
 #include <map>
+#include "string"
+
+//server libraries
+#include <poll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 #include <exception>
-#include <cstring>
 #include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <iostream>
 #include <csignal>
-#include "Client.hpp"
 
+class Client;
+class Channel;
 class Server
 {
 	private:
