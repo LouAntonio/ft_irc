@@ -97,9 +97,9 @@ void Server::acceptClient(void)
 	pfd.revents = 0;
 	_pollfds.push_back(pfd);
 	_clients[clientFd] = new Client(clientFd);
-	std::cout << "New client connected: " << clientFd << std::endl;
-	_clients[clientFd]->sendBuffer += welcome();
-	enablePollout(clientFd);
+	// std::cout << "New client connected: " << clientFd << std::endl;
+	// _clients[clientFd]->sendBuffer += welcome();
+	// enablePollout(clientFd);
 }
 
 void Server::receiveData(int indexFd)

@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/26 00:00:00 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/26 13:56:47 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/26 14:50:28 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -106,17 +106,3 @@ std::string Server::_setNickName(commandRequest& request, int sender_fd)
 	return response;
 }
 
-std::string Server::_pingPong(commandRequest& request, int sender_fd)
-{
-    std::string response;
-    (void)sender_fd;
-    if (request.args.empty())
-    {
-        response = ":localhost 409 * :No origin specified\r\n"; // ERR_NOORIGIN (409)
-    }
-    else
-    {
-        response = ":localhost PONG :" + request.args[0] + "\r\n";
-    }
-    return response;
-}

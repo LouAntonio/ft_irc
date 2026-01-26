@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/26 13:31:12 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/26 13:31:13 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/26 15:02:15 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -22,7 +22,10 @@ class	Client
 		std::string	sendBuffer;
 		std::string	nickName;
 		std::string	userName;
-		bool		auth;
+		bool hasPass;
+		bool hasNick;
+		bool hasUser;
+		bool auth;
 
 		Client(int fd);
 		~Client();
