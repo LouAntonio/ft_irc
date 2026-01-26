@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/24 12:03:08 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/24 14:57:25 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/26 13:56:20 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -18,32 +18,29 @@ std::string	Server::_parsing(const std::string& msg, int sender_fd)
 
     for (size_t i = 0; i < request.command.length(); ++i)
         request.command[i] = std::toupper(request.command[i]);
+    // comandos a serem implementados
+    /*
+    PASS
+    NICK
+    USER
+    JOIN
+    PART
+    TOPIC
+    PRIVMSG
+    MODE
+    INVITE
+    KICK
+    HELP
+    QUIT
+    */
     if (request.invalidMessage)
 	    return ("Invalid message!\r\n");
-	if (request.command == "PASS")
-		return ("_setPassWord(request, sender_fd)");
+    else if (request.command == "PING")
+        return (_pingPong(request, sender_fd));
 	else if (request.command == "NICK")
-		return ("_setNickName(request, sender_fd)");
-	else if (request.command == "USER")
-		return ("_setUserName(request, sender_fd)");
-	else if (request.command == "JOIN")
-		return ("_joinChannel(request, sender_fd)");
-    else if (request.command == "PART")
-		return ("_part(request, sender_fd)");
-	else if (request.command == "TOPIC")
-		return ("_topic(request, sender_fd)");
-    else if (request.command == "PRIVMSG")
-        return ("_privmsg(request, sender_fd)");
-	else if (request.command == "MODE")
-		return ("_setMode(request, sender_fd)");
-	else if (request.command == "INVITE")
-		return ("_invite(request, sender_fd)");
-	else if (request.command == "KICK")
-		return ("_kick(request, sender_fd)");
+		return (_setNickName(request, sender_fd));
     else if (request.command == "HELP" || request.command == "H")
 		return (_printHelpInfo(sender_fd));
-	else if (request.command == "QUIT")
-		return ("_quit(request, sender_fd)");
 	else
 		return ("Invalid command\r\n");
 };

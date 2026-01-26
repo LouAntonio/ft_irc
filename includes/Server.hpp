@@ -57,6 +57,8 @@ class Server
 		std::string _parsing(const std::string& msg, int sender_fd);
 		commandRequest _splitRequest(const std::string& req);
 		std::string _printHelpInfo(int sender_fd);
+		std::string _setNickName(commandRequest& request, int sender_fd);
+		std::string _pingPong(commandRequest& request, int sender_fd);
 
 	public:
 		Server(int port, const std::string& password);

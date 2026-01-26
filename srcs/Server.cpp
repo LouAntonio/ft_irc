@@ -217,35 +217,41 @@ std::string	Server::welcome(void)
 std::string Server::_printHelpInfo(int sender_fd)
 {
     std::string helpMsg;
-    helpMsg.append("=== Available IRC Commands ===\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Authentication & Setup:\r\n");
-    helpMsg.append("  PASS <password>           - Authenticate with server password\r\n");
-    helpMsg.append("  NICK <nickname>           - Set your nickname\r\n");
-    helpMsg.append("  USER <user> <mode> <unused> :<realname> - Set user information\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Channel Operations:\r\n");
-    helpMsg.append("  JOIN <#channel> [key]     - Join a channel (with optional password)\r\n");
-    helpMsg.append("  PART <#channel> [reason]  - Leave a channel\r\n");
-    helpMsg.append("  TOPIC <#channel> [topic]  - View or set channel topic\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Messaging:\r\n");
-    helpMsg.append("  PRIVMSG <target> :<msg>   - Send private message to user or channel\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Operator Commands:\r\n");
-    helpMsg.append("  KICK <#channel> <user> [reason] - Eject user from channel\r\n");
-    helpMsg.append("  INVITE <user> <#channel>  - Invite user to channel\r\n");
-    helpMsg.append("  MODE <#channel> <flags>   - Change channel mode:\r\n");
-    helpMsg.append("    +i/-i  Invite-only channel\r\n");
-    helpMsg.append("    +t/-t  Topic restricted to operators\r\n");
-    helpMsg.append("    +k/-k <key>  Set/remove channel password\r\n");
-    helpMsg.append("    +o/-o <user>  Give/take operator privilege\r\n");
-    helpMsg.append("    +l/-l <limit>  Set/remove user limit\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Other:\r\n");
-    helpMsg.append("  QUIT [message]            - Disconnect from server\r\n");
-    helpMsg.append("  HELP                      - Display this help\r\n");
-    helpMsg.append("==============================\r\n");
+    std::string nick = _clients[sender_fd]->getNickname();
+    if (nick.empty())
+        nick = "*";
+    
+    // RPL_INFO (371) para cada linha de ajuda
+    helpMsg.append(":localhost 371 " + nick + " :=== Available IRC Commands ===\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :Authentication & Setup:\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  PASS <password>           - Authenticate with server password\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  NICK <nickname>           - Set your nickname\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  USER <user> <mode> <unused> :<realname> - Set user information\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :Channel Operations:\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  JOIN <#channel> [key]     - Join a channel (with optional password)\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  PART <#channel> [reason]  - Leave a channel\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  TOPIC <#channel> [topic]  - View or set channel topic\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :Messaging:\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  PRIVMSG <target> :<msg>   - Send private message to user or channel\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :Operator Commands:\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  KICK <#channel> <user> [reason] - Eject user from channel\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  INVITE <user> <#channel>  - Invite user to channel\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  MODE <#channel> <flags>   - Change channel mode:\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :    +i/-i  Invite-only channel\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :    +t/-t  Topic restricted to operators\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :    +k/-k <key>  Set/remove channel password\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :    +o/-o <user>  Give/take operator privilege\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :    +l/-l <limit>  Set/remove user limit\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :Other:\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  QUIT [message]            - Disconnect from server\r\n");
+    helpMsg.append(":localhost 371 " + nick + " :  HELP                      - Display this help\r\n");
+    // RPL_ENDOFINFO (374)
+    helpMsg.append(":localhost 374 " + nick + " :End of INFO list\r\n");
     
     std::cout << "Help information sent to client: " << sender_fd << std::endl;
     return helpMsg;

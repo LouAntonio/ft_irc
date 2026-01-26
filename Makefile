@@ -4,7 +4,8 @@ SRC = srcs/main.cpp\
 	  srcs/Server.cpp\
 	  srcs/Client.cpp\
 	  srcs/Channel.cpp\
-	  srcs/commands/commands.cpp
+	  srcs/commands/commands.cpp\
+	  srcs/commands/nick.cpp
 
 CXX = c++
 
