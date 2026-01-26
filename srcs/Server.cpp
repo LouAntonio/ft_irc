@@ -105,53 +105,66 @@ void Server::acceptClient(void)
 
 void Server::receiveData(int indexFd)
 {
-	char buffer[6000];
-	ssize_t bytes = recv(_pollfds[indexFd].fd, buffer, sizeof(buffer), 0);
+    char buffer[6000];
+    int clientFd = _pollfds[indexFd].fd;
+    
+    ssize_t bytes = recv(clientFd, buffer, sizeof(buffer), 0);
 
-	if (bytes <= 0)
+    if (bytes <= 0)
 	{
-		if (bytes < 0)
-			std::cout << "Error in function recv()" << std::endl;
-		else
-			std::cout << "Client disconnected: " << _pollfds[indexFd].fd << std::endl;
-		removeClient(indexFd);
-		return;
-	}
-	else
-	{
-		std::string msg(buffer, strlen(buffer) - 1);
-		if (msg.length() > 0 && msg[msg.length() - 1] == '\n')
-			msg.erase(msg.length() - 1);
-		std::cout << "DEBUG: Received from client " << _pollfds[indexFd].fd << ": " << msg << std::endl;
-		std::string returnMsg = _parsing(msg, _pollfds[indexFd].fd);
-		_clients[_pollfds[indexFd].fd]->sendBuffer.append(returnMsg);
-		enablePollout(_pollfds[indexFd].fd);
-	}
+        if (bytes < 0) std::cerr << "Erro no recv" << std::endl;
+        removeClient(indexFd);
+        return;
+    }
+
+    _clients[clientFd]->recvBuffer.append(buffer, bytes);
+
+    size_t pos;
+    while ((pos = _clients[clientFd]->recvBuffer.find("\n")) != std::string::npos) 
+    {
+        std::string command = _clients[clientFd]->recvBuffer.substr(0, pos);
+        _clients[clientFd]->recvBuffer.erase(0, pos + 1);
+
+        if (!command.empty() && command[command.size() - 1] == '\r')
+            command.erase(command.size() - 1);
+
+        if (command.empty()) continue;
+
+        std::cout << "Executando comando do socket " << clientFd << ": " << command << std::endl;
+
+        // O _parsing deve processar a lógica e retornar a string formatada da RFC 1459
+        // Ex: Se recebeu "PING", retorna "PONG :servidor\r\n"
+        std::string response = _parsing(command, clientFd); 
+
+        if (!response.empty()) 
+{
+            _clients[clientFd]->sendBuffer.append(response);
+            enablePollout(clientFd);
+        }
+    }
 }
 
 void Server::sendData(int indexFd)
 {
-	int clientFd = _pollfds[indexFd].fd;
-	Client* client = _clients[clientFd];
-	if (client->sendBuffer.empty())
-		return;
-	ssize_t bytes = send(clientFd,
-		client->sendBuffer.c_str(),
-		client->sendBuffer.size(),
-		0);
+    int clientFd = _pollfds[indexFd].fd;
+    Client* client = _clients[clientFd];
 
-	if (bytes <= 0)
-	{
-		if (bytes < 0)
-			std::cout << "Error in function send" << std::endl;
-		else
-			std::cout << "Client disconnected: " << clientFd << std::endl;
-		removeClient(indexFd);
-		return;
-	}
-	client->sendBuffer.erase(0, bytes);
-	if (client->sendBuffer.empty())
-		disablePollout(clientFd);
+    if (client->sendBuffer.empty()) {
+        disablePollout(clientFd);
+        return;
+    }
+    ssize_t bytes = send(clientFd, client->sendBuffer.c_str(), client->sendBuffer.size(), 0);
+    if (bytes <= 0) {
+        if (bytes < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) return;
+            std::cerr << "Erro fatal no send" << std::endl;
+        }
+        removeClient(indexFd);
+        return;
+    }
+    client->sendBuffer.erase(0, bytes);
+    if (client->sendBuffer.empty())
+        disablePollout(clientFd);
 }
 
 void Server::removeClient(int indexFd)

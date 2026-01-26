@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <iostream>
 #include <csignal>
+#include <cerrno>
 
 // includes project files
 #include "Client.hpp"
