@@ -1,5 +1,6 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
+
 // contains necessary libraries
 #include <vector>
 #include <map>
@@ -17,6 +18,18 @@
 #include <sys/types.h>
 #include <iostream>
 #include <csignal>
+
+// includes project files
+#include "Client.hpp"
+#include "Channel.hpp"
+
+// Struct Request
+typedef struct s_Request
+{
+    std::vector<std::string> args;
+    std::string command;
+    bool invalidMessage;
+} commandRequest;
 
 class Client;
 class Channel;
@@ -39,6 +52,10 @@ class Server
 		void disablePollout(int fd);
 		std::string welcome(void);
 		//bool	auth(int clientFd);
+
+		std::string _parsing(const std::string& msg, int sender_fd);
+		commandRequest _splitRequest(const std::string& req);
+		std::string _printHelpInfo(int sender_fd);
 
 	public:
 		Server(int port, const std::string& password);

@@ -104,7 +104,7 @@ void Server::acceptClient(void)
 
 void Server::receiveData(int indexFd)
 {
-	char buffer[512];
+	char buffer[6000];
 	ssize_t bytes = recv(_pollfds[indexFd].fd, buffer, sizeof(buffer), 0);
 
 	if (bytes <= 0)
@@ -116,7 +116,16 @@ void Server::receiveData(int indexFd)
 		removeClient(indexFd);
 		return;
 	}
-	_clients[_pollfds[indexFd].fd]->recvBuffer.append(buffer, bytes);
+	else
+	{
+		std::string msg(buffer, strlen(buffer) - 1);
+		if (msg.length() > 0 && msg[msg.length() - 1] == '\n')
+			msg.erase(msg.length() - 1);
+		std::cout << "DEBUG: Received from client " << _pollfds[indexFd].fd << ": " << msg << std::endl;
+		std::string returnMsg = _parsing(msg, _pollfds[indexFd].fd);
+		_clients[_pollfds[indexFd].fd]->sendBuffer.append(returnMsg);
+		enablePollout(_pollfds[indexFd].fd);
+	}
 }
 
 void Server::sendData(int indexFd)
@@ -191,3 +200,40 @@ std::string	Server::welcome(void)
 	msg.append("You need to login so you can start chatting\r\n");
 	return (msg);
 };
+
+std::string Server::_printHelpInfo(int sender_fd)
+{
+    std::string helpMsg;
+    helpMsg.append("=== Available IRC Commands ===\r\n");
+    helpMsg.append("\r\n");
+    helpMsg.append("Authentication & Setup:\r\n");
+    helpMsg.append("  PASS <password>           - Authenticate with server password\r\n");
+    helpMsg.append("  NICK <nickname>           - Set your nickname\r\n");
+    helpMsg.append("  USER <user> <mode> <unused> :<realname> - Set user information\r\n");
+    helpMsg.append("\r\n");
+    helpMsg.append("Channel Operations:\r\n");
+    helpMsg.append("  JOIN <#channel> [key]     - Join a channel (with optional password)\r\n");
+    helpMsg.append("  PART <#channel> [reason]  - Leave a channel\r\n");
+    helpMsg.append("  TOPIC <#channel> [topic]  - View or set channel topic\r\n");
+    helpMsg.append("\r\n");
+    helpMsg.append("Messaging:\r\n");
+    helpMsg.append("  PRIVMSG <target> :<msg>   - Send private message to user or channel\r\n");
+    helpMsg.append("\r\n");
+    helpMsg.append("Operator Commands:\r\n");
+    helpMsg.append("  KICK <#channel> <user> [reason] - Eject user from channel\r\n");
+    helpMsg.append("  INVITE <user> <#channel>  - Invite user to channel\r\n");
+    helpMsg.append("  MODE <#channel> <flags>   - Change channel mode:\r\n");
+    helpMsg.append("    +i/-i  Invite-only channel\r\n");
+    helpMsg.append("    +t/-t  Topic restricted to operators\r\n");
+    helpMsg.append("    +k/-k <key>  Set/remove channel password\r\n");
+    helpMsg.append("    +o/-o <user>  Give/take operator privilege\r\n");
+    helpMsg.append("    +l/-l <limit>  Set/remove user limit\r\n");
+    helpMsg.append("\r\n");
+    helpMsg.append("Other:\r\n");
+    helpMsg.append("  QUIT [message]            - Disconnect from server\r\n");
+    helpMsg.append("  HELP                      - Display this help\r\n");
+    helpMsg.append("==============================\r\n");
+    
+    std::cout << "Help information sent to client: " << sender_fd << std::endl;
+    return helpMsg;
+}
