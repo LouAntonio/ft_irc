@@ -37,7 +37,7 @@ void Server::setupSocket(void)
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverFd < 0)
 		throw std::runtime_error("socket() failed");
-    int opt = 1;
+	int opt = 1;
 	if (setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 		throw std::runtime_error("setsockopt() failed");
 	sockaddr_in addr;
@@ -105,66 +105,66 @@ void Server::acceptClient(void)
 
 void Server::receiveData(int indexFd)
 {
-    char buffer[6000];
-    int clientFd = _pollfds[indexFd].fd;
-    
-    ssize_t bytes = recv(clientFd, buffer, sizeof(buffer), 0);
+	char        buffer[6000];
+	int         fd =_pollfds[indexFd].fd;
+	Client      *client = _clients[fd];
+	
+	ssize_t     bytes = recv(fd, buffer, sizeof(buffer), 0);
 
-    if (bytes <= 0)
+	if (bytes <= 0)
 	{
-        if (bytes < 0) std::cerr << "Erro no recv" << std::endl;
-        removeClient(indexFd);
-        return;
-    }
+		if (bytes < 0)
+			std::cout << "Error in recv()" << std::endl;
+		else
+			std::cout << "Client disconnected: " << fd << std::endl;
 
-    _clients[clientFd]->recvBuffer.append(buffer, bytes);
+		removeClient(indexFd);
+		return;
+	}
 
-    size_t pos;
-    while ((pos = _clients[clientFd]->recvBuffer.find("\n")) != std::string::npos) 
-    {
-        std::string command = _clients[clientFd]->recvBuffer.substr(0, pos);
-        _clients[clientFd]->recvBuffer.erase(0, pos + 1);
+	std::vector<std::string> comandos = _clients[_pollfds[indexFd].fd]->command->input_builder(client->recvBuffer, buffer, bytes);
 
-        if (!command.empty() && command[command.size() - 1] == '\r')
-            command.erase(command.size() - 1);
+	for (size_t i = 0; i < comandos.size(); ++i)
+	{
+		std::string &cmd = comandos[i];
+		if (cmd.empty()) continue;
 
-        if (command.empty()) continue;
-
-        std::cout << "Executando comando do socket " << clientFd << ": " << command << std::endl;
-
-        // O _parsing deve processar a lógica e retornar a string formatada da RFC 1459
-        // Ex: Se recebeu "PING", retorna "PONG :servidor\r\n"
-        std::string response = _parsing(command, clientFd); 
-
-        if (!response.empty()) 
-{
-            _clients[clientFd]->sendBuffer.append(response);
-            enablePollout(clientFd);
-        }
-    }
+		if (cmd.length() > 512)
+		{
+			client->sendBuffer.append("ERROR :Command too long\r\n");
+		}
+		else
+		{
+			// O _parsing deve processar a lógica e retornar a string formatada da RFC 1459
+			// Ex: Se recebeu "PING", retorna "PONG :servidor\r\n"
+			std::string reply = _parsing(cmd, fd);
+			client->sendBuffer.append(reply);
+		}
+		enablePollout(fd);
+	}
 }
 
 void Server::sendData(int indexFd)
 {
-    int clientFd = _pollfds[indexFd].fd;
-    Client* client = _clients[clientFd];
+	int clientFd = _pollfds[indexFd].fd;
+	Client* client = _clients[clientFd];
 
-    if (client->sendBuffer.empty()) {
-        disablePollout(clientFd);
-        return;
-    }
-    ssize_t bytes = send(clientFd, client->sendBuffer.c_str(), client->sendBuffer.size(), 0);
-    if (bytes <= 0) {
-        if (bytes < 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) return;
-            std::cerr << "Erro fatal no send" << std::endl;
-        }
-        removeClient(indexFd);
-        return;
-    }
-    client->sendBuffer.erase(0, bytes);
-    if (client->sendBuffer.empty())
-        disablePollout(clientFd);
+	if (client->sendBuffer.empty()) {
+		disablePollout(clientFd);
+		return;
+	}
+	ssize_t bytes = send(clientFd, client->sendBuffer.c_str(), client->sendBuffer.size(), 0);
+	if (bytes <= 0) {
+		if (bytes < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) return;
+			std::cerr << "Erro fatal no send" << std::endl;
+		}
+		removeClient(indexFd);
+		return;
+	}
+	client->sendBuffer.erase(0, bytes);
+	if (client->sendBuffer.empty())
+		disablePollout(clientFd);
 }
 
 void Server::removeClient(int indexFd)
@@ -180,26 +180,26 @@ void Server::removeClient(int indexFd)
 
 void Server::enablePollout(int fd)
 {
-    for (size_t i = 0; i < _pollfds.size(); ++i)
-    {
-        if (_pollfds[i].fd == fd)
-        {
-            _pollfds[i].events |= POLLOUT;
-            break;
-        }
-    }
+	for (size_t i = 0; i < _pollfds.size(); ++i)
+	{
+		if (_pollfds[i].fd == fd)
+		{
+			_pollfds[i].events |= POLLOUT;
+			break;
+		}
+	}
 }
 
 void Server::disablePollout(int fd)
 {
-    for (size_t i = 0; i < _pollfds.size(); ++i)
-    {
-        if (_pollfds[i].fd == fd)
-        {
-            _pollfds[i].events &= ~POLLOUT;
-            break;
-        }
-    }
+	for (size_t i = 0; i < _pollfds.size(); ++i)
+	{
+		if (_pollfds[i].fd == fd)
+		{
+			_pollfds[i].events &= ~POLLOUT;
+			break;
+		}
+	}
 }
 
 std::string	Server::welcome(void)
@@ -217,37 +217,37 @@ std::string	Server::welcome(void)
 
 std::string Server::_printHelpInfo(int sender_fd)
 {
-    std::string helpMsg;
-    helpMsg.append("=== Available IRC Commands ===\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Authentication & Setup:\r\n");
-    helpMsg.append("  PASS <password>           - Authenticate with server password\r\n");
-    helpMsg.append("  NICK <nickname>           - Set your nickname\r\n");
-    helpMsg.append("  USER <user> <mode> <unused> :<realname> - Set user information\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Channel Operations:\r\n");
-    helpMsg.append("  JOIN <#channel> [key]     - Join a channel (with optional password)\r\n");
-    helpMsg.append("  PART <#channel> [reason]  - Leave a channel\r\n");
-    helpMsg.append("  TOPIC <#channel> [topic]  - View or set channel topic\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Messaging:\r\n");
-    helpMsg.append("  PRIVMSG <target> :<msg>   - Send private message to user or channel\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Operator Commands:\r\n");
-    helpMsg.append("  KICK <#channel> <user> [reason] - Eject user from channel\r\n");
-    helpMsg.append("  INVITE <user> <#channel>  - Invite user to channel\r\n");
-    helpMsg.append("  MODE <#channel> <flags>   - Change channel mode:\r\n");
-    helpMsg.append("    +i/-i  Invite-only channel\r\n");
-    helpMsg.append("    +t/-t  Topic restricted to operators\r\n");
-    helpMsg.append("    +k/-k <key>  Set/remove channel password\r\n");
-    helpMsg.append("    +o/-o <user>  Give/take operator privilege\r\n");
-    helpMsg.append("    +l/-l <limit>  Set/remove user limit\r\n");
-    helpMsg.append("\r\n");
-    helpMsg.append("Other:\r\n");
-    helpMsg.append("  QUIT [message]            - Disconnect from server\r\n");
-    helpMsg.append("  HELP                      - Display this help\r\n");
-    helpMsg.append("==============================\r\n");
-    
-    std::cout << "Help information sent to client: " << sender_fd << std::endl;
-    return helpMsg;
+	std::string helpMsg;
+	helpMsg.append("=== Available IRC Commands ===\r\n");
+	helpMsg.append("\r\n");
+	helpMsg.append("Authentication & Setup:\r\n");
+	helpMsg.append("  PASS <password>           - Authenticate with server password\r\n");
+	helpMsg.append("  NICK <nickname>           - Set your nickname\r\n");
+	helpMsg.append("  USER <user> <mode> <unused> :<realname> - Set user information\r\n");
+	helpMsg.append("\r\n");
+	helpMsg.append("Channel Operations:\r\n");
+	helpMsg.append("  JOIN <#channel> [key]     - Join a channel (with optional password)\r\n");
+	helpMsg.append("  PART <#channel> [reason]  - Leave a channel\r\n");
+	helpMsg.append("  TOPIC <#channel> [topic]  - View or set channel topic\r\n");
+	helpMsg.append("\r\n");
+	helpMsg.append("Messaging:\r\n");
+	helpMsg.append("  PRIVMSG <target> :<msg>   - Send private message to user or channel\r\n");
+	helpMsg.append("\r\n");
+	helpMsg.append("Operator Commands:\r\n");
+	helpMsg.append("  KICK <#channel> <user> [reason] - Eject user from channel\r\n");
+	helpMsg.append("  INVITE <user> <#channel>  - Invite user to channel\r\n");
+	helpMsg.append("  MODE <#channel> <flags>   - Change channel mode:\r\n");
+	helpMsg.append("    +i/-i  Invite-only channel\r\n");
+	helpMsg.append("    +t/-t  Topic restricted to operators\r\n");
+	helpMsg.append("    +k/-k <key>  Set/remove channel password\r\n");
+	helpMsg.append("    +o/-o <user>  Give/take operator privilege\r\n");
+	helpMsg.append("    +l/-l <limit>  Set/remove user limit\r\n");
+	helpMsg.append("\r\n");
+	helpMsg.append("Other:\r\n");
+	helpMsg.append("  QUIT [message]            - Disconnect from server\r\n");
+	helpMsg.append("  HELP                      - Display this help\r\n");
+	helpMsg.append("==============================\r\n");
+	
+	std::cout << "Help information sent to client: " << sender_fd << std::endl;
+	return helpMsg;
 }
