@@ -1,26 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-// contains necessary libraries
-#include <vector>
-#include <map>
-#include "string"
-
-//server libraries
-#include <poll.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-
-#include <exception>
-#include <cstring>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <iostream>
-#include <csignal>
-#include <cerrno>
-
-// includes project files
+#include "irc.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
 

@@ -1,4 +1,5 @@
 #include "../includes/Server.hpp"
+#include "../includes/Client.hpp"
 
 void Server::handler(int signal)
 {
@@ -36,7 +37,7 @@ void Server::setupSocket(void)
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverFd < 0)
 		throw std::runtime_error("socket() failed");
-    int opt = 1;
+	int opt = 1;
 	if (setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 		throw std::runtime_error("setsockopt() failed");
 	sockaddr_in addr;
@@ -100,17 +101,18 @@ void Server::acceptClient(void)
 
 void Server::receiveData(int indexFd)
 {
-    char buffer[6000];
-    int clientFd = _pollfds[indexFd].fd;
-    
-    ssize_t bytes = recv(clientFd, buffer, sizeof(buffer), 0);
+	char        buffer[6000];
+	int         fd =_pollfds[indexFd].fd;
+	Client      *client = _clients[fd];
+	
+	ssize_t     bytes = recv(fd, buffer, sizeof(buffer), 0);
 
-    if (bytes <= 0)
+	if (bytes <= 0)
 	{
-        if (bytes < 0) std::cerr << "Erro no recv" << std::endl;
-        removeClient(indexFd);
-        return;
-    }
+		if (bytes < 0)
+			std::cout << "Error in recv()" << std::endl;
+		else
+			std::cout << "Client disconnected: " << fd << std::endl;
 
     _clients[clientFd]->setRecvBuffer(_clients[clientFd]->getRecvBuffer() + std::string(buffer, bytes));
 
@@ -125,7 +127,7 @@ void Server::receiveData(int indexFd)
 
         if (command.empty()) continue;
 
-        std::cout << "Executando comando do socket " << clientFd << ": " << command << std::endl;
+	std::vector<std::string> comandos = _clients[_pollfds[indexFd].fd]->command->input_builder(client->recvBuffer, buffer, bytes);
 
         std::string response = _parsing(command, clientFd); 
 
@@ -175,26 +177,26 @@ void Server::removeClient(int indexFd)
 
 void Server::enablePollout(int fd)
 {
-    for (size_t i = 0; i < _pollfds.size(); ++i)
-    {
-        if (_pollfds[i].fd == fd)
-        {
-            _pollfds[i].events |= POLLOUT;
-            break;
-        }
-    }
+	for (size_t i = 0; i < _pollfds.size(); ++i)
+	{
+		if (_pollfds[i].fd == fd)
+		{
+			_pollfds[i].events |= POLLOUT;
+			break;
+		}
+	}
 }
 
 void Server::disablePollout(int fd)
 {
-    for (size_t i = 0; i < _pollfds.size(); ++i)
-    {
-        if (_pollfds[i].fd == fd)
-        {
-            _pollfds[i].events &= ~POLLOUT;
-            break;
-        }
-    }
+	for (size_t i = 0; i < _pollfds.size(); ++i)
+	{
+		if (_pollfds[i].fd == fd)
+		{
+			_pollfds[i].events &= ~POLLOUT;
+			break;
+		}
+	}
 }
 
 std::string	Server::welcome(void)
