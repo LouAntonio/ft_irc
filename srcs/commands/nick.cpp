@@ -1,14 +1,14 @@
-/******************************************************************************/
+/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   nick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/26 00:00:00 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/27 10:04:56 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/27 11:36:02 by lantonio         ###   ########.fr       */
 /*                                                                            */
-/******************************************************************************/
+/* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
 
@@ -45,6 +45,8 @@ std::string Server::_setNickName(commandRequest& request, int fd)
     if (request.args.empty())
         return ":localhost 431 * :No nickname given\r\n";
 
+    if (request.args.size() > 1)
+        return ":localhost 431 * :To many arguments for command\r\n";
     std::string newNick = request.args[0];
     if (!isValidNickname(newNick))
         return ":localhost 432 * " + newNick + " :Erroneous nickname\r\n";

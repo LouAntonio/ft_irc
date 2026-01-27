@@ -114,27 +114,27 @@ void Server::receiveData(int indexFd)
 		else
 			std::cout << "Client disconnected: " << fd << std::endl;
 
-    _clients[clientFd]->setRecvBuffer(_clients[clientFd]->getRecvBuffer() + std::string(buffer, bytes));
+    _clients[fd]->setRecvBuffer(_clients[fd]->getRecvBuffer() + std::string(buffer, bytes));
 
     size_t pos;
-    while ((pos = _clients[clientFd]->getRecvBuffer().find("\n")) != std::string::npos) 
+    while ((pos = _clients[fd]->getRecvBuffer().find("\n")) != std::string::npos) 
     {
-        std::string command = _clients[clientFd]->getRecvBuffer().substr(0, pos);
-        _clients[clientFd]->setRecvBuffer(_clients[clientFd]->getRecvBuffer().substr(pos + 1));
+        std::string command = _clients[fd]->getRecvBuffer().substr(0, pos);
+        _clients[fd]->setRecvBuffer(_clients[fd]->getRecvBuffer().substr(pos + 1));
 
         if (!command.empty() && command[command.size() - 1] == '\r')
             command.erase(command.size() - 1);
 
         if (command.empty()) continue;
 
-	std::vector<std::string> comandos = _clients[_pollfds[indexFd].fd]->command->input_builder(client->recvBuffer, buffer, bytes);
+		std::vector<std::string> comandos = _input_builder(_clients[fd], buffer, bytes);
 
-        std::string response = _parsing(command, clientFd); 
+        std::string response = _parsing(command, fd); 
 
         if (!response.empty()) 
         {
-            _clients[clientFd]->setSendBuffer(_clients[clientFd]->getSendBuffer() + response);
-            enablePollout(clientFd);
+            _clients[fd]->setSendBuffer(_clients[fd]->getSendBuffer() + response);
+            enablePollout(fd);
         }
     }
 }

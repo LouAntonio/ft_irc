@@ -45,6 +45,8 @@ class Server
 		//bool	auth(int clientFd);
 
 		std::string _parsing(const std::string& msg, int sender_fd);
+		std::vector<std::string> _input_builder(Client* _client, char *newBuffer, int bytesRead);
+
 		void printRequest(const std::string& input, const commandRequest& req);
 		commandRequest _splitRequest(const std::string& req);
 		std::string _printHelpInfo(int sender_fd);

@@ -3,6 +3,8 @@ NAME = ircserv
 SRC = srcs/main.cpp\
 	  srcs/Channel.cpp\
 	  srcs/commands/commands.cpp\
+	  srcs/Client.cpp\
+	  srcs/Server.cpp\
 	  srcs/commands/nick.cpp
 
 CXX = c++
