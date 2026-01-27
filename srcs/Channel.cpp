@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:45:21 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/24 11:46:37 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/27 15:45:43 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -37,6 +37,33 @@ std::map<int, Client *> const &Channel::getOperators() const
     return _operators;
 }
 
+std::string const &Channel::getChannelPassword() const
+{
+    return _channelPassword;
+}
+
+std::map<int, Client *> const &Channel::getBannedMembers() const
+{
+    return _bannedMembers;
+}
+
+std::map<int, Client *> const &Channel::getInvitedMembers() const
+{
+    return _invitedMembers;
+}
+
+bool Channel::getIsInviteOnly() const
+{
+    return _isInviteOnly;
+}
+
+bool Channel::getHasPassword() const
+{
+    return _hasPassword;
+}
+
+
+
 // Member management
 int Channel::addMember(Client* member)
 {
@@ -63,7 +90,7 @@ int Channel::addOperator(Client* member)
 void Channel::removeMember(int clientFd)
 {
     _members.erase(clientFd);
-    _operators.erase(clientFd); // Also remove from operators if present
+    _operators.erase(clientFd);
 }
 
 void Channel::removeOperator(int clientFd)
@@ -81,3 +108,18 @@ bool Channel::isOperator(int clientFd) const
 {
     return _operators.find(clientFd) != _operators.end();
 }
+
+// setters
+void Channel::setChannelPassword(const std::string& password)
+{
+    _channelPassword = password;
+    _hasPassword = true;
+}
+
+void Channel::setInviteOnly(void)
+{
+     _isInviteOnly = true; 
+}
+
+void Channel::setHasPassword(void) { _hasPassword = true; }
+

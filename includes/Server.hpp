@@ -32,6 +32,7 @@ class Server
 		std::string _password;
 		std::vector<struct pollfd> _pollfds;
 		std::map<int, Client*> _clients;
+		std::map<std::string, Channel*> _channels;
 
 		void setupSocket(void);
 		void acceptClient(void);
@@ -53,6 +54,7 @@ class Server
 		std::string _setPassWord(commandRequest& request, int fd);
         std::string _setUserName(commandRequest& request, int fd);
         std::string attemptRegistration(int fd);
+		std::string _joinChannel(commandRequest& request, int fd);
 
 	public:
 		Server(int port, const std::string& password);

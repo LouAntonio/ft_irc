@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/24 12:03:08 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/27 10:43:37 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/27 14:40:24 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -27,6 +27,7 @@ std::string Server::_parsing(const std::string& msg, int sender_fd) {
     if (request.command == "NICK") return _setNickName(request, sender_fd);
     if (request.command == "USER") return _setUserName(request, sender_fd);
     if (request.command == "PING") return _pingPong(request, sender_fd);
+    if (request.command == "JOIN") return _joinChannel(request, sender_fd);
     if (request.command == "HELP" || request.command == "H") return _printHelpInfo(sender_fd);
 
     // Resposta padrão RFC para comando desconhecido (421)
@@ -171,4 +172,29 @@ std::string Server::attemptRegistration(int fd)
         return res;
     }
     return "";
+}
+
+
+std::string Server::_joinChannel(commandRequest& request, int fd)
+{
+    if (!_clients[fd]->isAuth())
+        return ":localhost 464 * :You need to register first.\r\n";
+
+    if (request.args.empty())
+        return ":localhost 461 * JOIN :Not enough parameters\r\n";
+
+    std::string channelName = request.args[0];
+
+    if (!_channels[channelName])
+    {
+        _channels[channelName] = new Channel(channelName, _clients[fd]);
+        return ":localhost 331 " + _clients[fd]->getNickname() + " " + channelName + " :No topic is set\r\n";
+    }
+    else if (_channels[channelName]->isMember(fd))
+    {
+        return ":localhost 443 " + _clients[fd]->getNickname() + " " + channelName + " :You're already on that channel\r\n";
+    }
+
+    _channels[channelName]->addMember(_clients[fd]);
+    return ":localhost 331 " + _clients[fd]->getNickname() + " " + channelName + " :No topic is set\r\n";
 }
