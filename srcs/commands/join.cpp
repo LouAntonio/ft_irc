@@ -6,11 +6,24 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/30 12:17:26 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/30 12:53:09 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/30 14:03:32 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
 #include "../../includes/Server.hpp"
+
+
+bool Server::isValidChannelName(const std::string& name)
+{
+    if (name.empty() || name[0] != '#')
+        return false;
+    for (size_t i = 1; i < name.length(); ++i)
+    {
+        if (!isalnum(name[i]) && name[i] != '_' && name[i] != '-')
+            return false;
+    }
+    return true;
+}
 
 std::string Server::_joinChannel(commandRequest& request, int fd)
 {
@@ -19,8 +32,11 @@ std::string Server::_joinChannel(commandRequest& request, int fd)
 
     if (request.args.empty())
         return ":localhost 461 * JOIN :Not enough parameters\r\n";
-
+    
     std::string channelName = request.args[0];
+    if (!isValidChannelName(channelName))
+        return ":localhost 403 * " + channelName + " :Invalid channel name\r\n";
+    
     std::string password = (request.args.size() > 1) ? request.args[1] : "";
 
     if (!_channels[channelName])

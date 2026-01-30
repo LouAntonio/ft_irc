@@ -43,7 +43,6 @@ class Server
 		void enablePollout(int fd);
 		void disablePollout(int fd);
 		std::string welcome(void);
-		//bool	auth(int clientFd);
 
 		std::string _parsing(const std::string& msg, int sender_fd);
 		std::vector<std::string> _input_builder(Client* client, char *newBuffer, int bytesRead);
@@ -58,6 +57,9 @@ class Server
         std::string attemptRegistration(int fd);
 		std::string _joinChannel(commandRequest& request, int fd);
 		std::string _privmsg(commandRequest& request, int sender_fd);
+
+		//verificadores
+		bool isValidChannelName(const std::string& name);
 
 	public:
 		Server(int port, const std::string& password);
