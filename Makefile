@@ -36,4 +36,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+run:
+	./$(NAME) 3000 1234
+
+.PHONY: all clean fclean re run

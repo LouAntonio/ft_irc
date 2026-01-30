@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:15:54 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/27 15:45:45 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/30 12:36:38 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -58,6 +58,8 @@ class Channel
         void setChannelPassword(const std::string& password);
         void setInviteOnly(void);
         void setHasPassword(void);
+        void setBannedMember(Client* member);
+        void setInvitedMember(Client* member);
 
         // Verification
         bool isMember(int clientFd) const;
