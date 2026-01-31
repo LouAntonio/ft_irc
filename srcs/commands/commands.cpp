@@ -6,13 +6,14 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/24 12:03:08 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/27 14:40:24 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/30 12:25:10 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
 #include "../../includes/Server.hpp"
 
-std::string Server::_parsing(const std::string& msg, int sender_fd) {
+std::string Server::_parsing(const std::string& msg, int sender_fd) 
+{
     commandRequest request(_splitRequest(msg));
     if (request.command.empty()) return "";
 
@@ -34,28 +35,6 @@ std::string Server::_parsing(const std::string& msg, int sender_fd) {
     // Resposta padrão RFC para comando desconhecido (421)
     std::string nick = _clients[sender_fd]->getNickname().empty() ? "*" : _clients[sender_fd]->getNickname();
     return ":localhost 421 " + nick + " " + request.command + " :Unknown command\r\n";
-}
-
-std::string Server::_privmsg(commandRequest& request, int sender_fd)
-{
-    if (!_clients[sender_fd]->isAuth())
-        return ":localhost 451 * :You have not registered\r\n";
-    if (request.args.size() < 1)
-        return ":localhost 461 PRIVMSG :Not enough parameters\r\n";
-    int recv_fd = -1;
-    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end();++it)
-    {
-        if (it->second->getNickname() == request.args[0])
-            recv_fd = it->first;
-    }
-    if (recv_fd == -1)
-        return ":localhost 401 " + _clients[sender_fd]->getNickname() + " " + request.args[0]+" :No such nick\r\n";
-    
-    std::string msg = ":" + _clients[sender_fd]->getNickname() + "!" + _clients[sender_fd]->getUsername() + "@localhost PRIVMSG " + request.args[0] +" :" + request.args[1] + "\r\n";
-
-    _clients[recv_fd]->setSendBuffer(_clients[recv_fd]->getSendBuffer() + msg);
-    enablePollout(recv_fd);
-    return "";
 }
 
 commandRequest Server::_splitRequest(const std::string& req)
@@ -139,41 +118,8 @@ std::string Server::_pingPong(commandRequest& request, int sender_fd)
     {
         response = ":localhost PONG :" + request.args[0] + "\r\n";
     }
-    std::cout << "DEBUG: Responding to PING with PONG " << request.args[0] << std::endl;
     return response;
 }
-
-std::string Server::_setPassWord(commandRequest& request, int fd) 
-{
-    if (_clients[fd]->isAuth()) return "";
-
-    if (request.args.empty())
-        return ":localhost 461 * PASS :Not enough parameters\r\n";
-
-    if (request.args[0] != _password)
-        return ":localhost 464 * :Password incorrect\r\n";
-
-    _clients[fd]->setHasPass(true);
-    return "";
-}
-
-std::string Server::_setUserName(commandRequest& request, int fd) 
-{
-    if (_clients[fd]->isAuth()) return ""; 
-
-    if (!_clients[fd]->getHasPass())
-        return ":localhost 464 * :Password required. Send PASS first.\r\n";
-
-    if (request.args.size() < 4)
-        return ":localhost 461 * USER :Not enough parameters\r\n";
-
-    _clients[fd]->setUsername(request.args[0]);
-    _clients[fd]->setHasUser(true);
-
-    return attemptRegistration(fd);
-}
-
-
 
 std::string Server::attemptRegistration(int fd) 
 {
@@ -198,26 +144,4 @@ std::string Server::attemptRegistration(int fd)
 }
 
 
-std::string Server::_joinChannel(commandRequest& request, int fd)
-{
-    if (!_clients[fd]->isAuth())
-        return ":localhost 464 * :You need to register first.\r\n";
 
-    if (request.args.empty())
-        return ":localhost 461 * JOIN :Not enough parameters\r\n";
-
-    std::string channelName = request.args[0];
-
-    if (!_channels[channelName])
-    {
-        _channels[channelName] = new Channel(channelName, _clients[fd]);
-        return ":localhost 331 " + _clients[fd]->getNickname() + " " + channelName + " :No topic is set\r\n";
-    }
-    else if (_channels[channelName]->isMember(fd))
-    {
-        return ":localhost 443 " + _clients[fd]->getNickname() + " " + channelName + " :You're already on that channel\r\n";
-    }
-
-    _channels[channelName]->addMember(_clients[fd]);
-    return ":localhost 331 " + _clients[fd]->getNickname() + " " + channelName + " :No topic is set\r\n";
-}

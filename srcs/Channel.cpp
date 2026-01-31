@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:45:21 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/27 15:45:43 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/01/30 12:43:25 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -22,42 +22,42 @@ Channel::Channel(const std::string& channelName, Client* creator)
 Channel::~Channel() {}
 
 // Getters
-std::string const &Channel::getName() const
+std::string const &Channel::getName() const // retorna o nome do canal
 {
     return _name;
 }
 
-std::map<int, Client *> const &Channel::getMembers() const
+std::map<int, Client *> const &Channel::getMembers() const // retorna os membros do canal
 {
     return _members;
 }
 
-std::map<int, Client *> const &Channel::getOperators() const
+std::map<int, Client *> const &Channel::getOperators() const // retorna os operadores do canal
 {
     return _operators;
 }
 
-std::string const &Channel::getChannelPassword() const
+std::string const &Channel::getChannelPassword() const // retorna a senha do canal
 {
     return _channelPassword;
 }
 
-std::map<int, Client *> const &Channel::getBannedMembers() const
+std::map<int, Client *> const &Channel::getBannedMembers() const // retorna os membros banidos do canal
 {
     return _bannedMembers;
 }
 
-std::map<int, Client *> const &Channel::getInvitedMembers() const
+std::map<int, Client *> const &Channel::getInvitedMembers() const // retorna os membros convidados do canal
 {
     return _invitedMembers;
 }
 
-bool Channel::getIsInviteOnly() const
+bool Channel::getIsInviteOnly() const // retorna se o canal é invite-only
 {
     return _isInviteOnly;
 }
 
-bool Channel::getHasPassword() const
+bool Channel::getHasPassword() const // retorna se o canal tem senha
 {
     return _hasPassword;
 }
@@ -65,7 +65,7 @@ bool Channel::getHasPassword() const
 
 
 // Member management
-int Channel::addMember(Client* member)
+int Channel::addMember(Client* member) // adiciona um membro ao canal
 {
     if (_members.find(member->getClientfd()) == _members.end())
     {
@@ -75,7 +75,7 @@ int Channel::addMember(Client* member)
     return USERALREADYJOINED;
 }
 
-int Channel::addOperator(Client* member)
+int Channel::addOperator(Client* member) // adiciona um operador ao canal
 {
     if (_members.find(member->getClientfd()) == _members.end())
         return USERNOTMEMBER;
@@ -87,39 +87,67 @@ int Channel::addOperator(Client* member)
     return USERISJOINED;
 }
 
-void Channel::removeMember(int clientFd)
+void Channel::removeMember(int clientFd) // remove um membro do canal
 {
     _members.erase(clientFd);
     _operators.erase(clientFd);
 }
 
-void Channel::removeOperator(int clientFd)
+void Channel::removeOperator(int clientFd) // remove um operador do canal
 {
     _operators.erase(clientFd);
 }
 
 // Verification
-bool Channel::isMember(int clientFd) const
+bool Channel::isMember(int clientFd) const // verifica se o cliente é membro do canal
 {
     return _members.find(clientFd) != _members.end();
 }
 
-bool Channel::isOperator(int clientFd) const
+bool Channel::isOperator(int clientFd) const // verifica se o cliente é operador do canal
 {
     return _operators.find(clientFd) != _operators.end();
 }
 
 // setters
-void Channel::setChannelPassword(const std::string& password)
+void Channel::setChannelPassword(const std::string& password) // seta a senha do canal
 {
     _channelPassword = password;
-    _hasPassword = true;
 }
 
-void Channel::setInviteOnly(void)
+void Channel::setInviteOnly(void) // seta o canal como invite-only
 {
      _isInviteOnly = true; 
 }
 
-void Channel::setHasPassword(void) { _hasPassword = true; }
+void Channel::setHasPassword(void) // seta o canal como tendo senha
+{
+     _hasPassword = true; 
+}
+
+void Channel::setBannedMember(Client* member) // adiciona um membro à lista de banidos
+{
+    if (_bannedMembers.find(member->getClientfd()) != _bannedMembers.end())
+        return;
+    if (!(isMember(member->getClientfd())))
+        return;
+    removeMember(member->getClientfd());
+    _bannedMembers.insert(std::pair<int, Client *>(member->getClientfd(), member));
+
+}
+
+void Channel::setInvitedMember(Client* member) // adiciona um membro à lista de convidados
+{
+    if (_invitedMembers.find(member->getClientfd()) != _invitedMembers.end())
+        return;
+    
+    if (isMember(member->getClientfd()))
+        return;
+    
+    if (_bannedMembers.find(member->getClientfd()) != _bannedMembers.end())
+        _bannedMembers.erase(member->getClientfd());
+    _invitedMembers.insert(std::pair<int, Client *>(member->getClientfd(), member));
+}
+
+
 
