@@ -6,7 +6,7 @@
 /*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:45:21 by hmateque          #+#    #+#             */
-/*   Updated: 2026/02/03 11:22:40 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/03 12:55:40 by lantonio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ Channel::Channel(const std::string& channelName, Client* creator)
 {
 	_topic = "";
 	_hasTopic = false;
+	_isOperatorsOnly = false;
 	_operators.insert(std::pair<int, Client*>(creator->getClientfd(), creator));
 	_members.insert(std::pair<int, Client*>(creator->getClientfd(), creator));
 }
@@ -64,8 +65,12 @@ bool Channel::getHasPassword() const // retorna se o canal tem senha
 	return _hasPassword;
 }
 
-bool    Channel::getHasTopic() const {
+bool    Channel::getHasTopic() const { // check if channel has a topic
 	return this->_hasTopic;
+}
+
+bool	Channel::getIsOperatorsOnly() const { // check if channel is in mode +t
+	return this->_isOperatorsOnly;
 }
 
 std::string Channel::getTopic() const {
@@ -167,6 +172,16 @@ void    Channel::setTopic(int member_id, std::string topic) { //set a topic to t
 	// return if is in +t mode and member is not an operator
 
 	this->_topic = topic;
+}
+
+void	Channel::setIsOperatorsOnly(int member_id, std::string mode, std::string nick) {
+	(void)nick;
+	if (!(_operators.find(member_id) != _operators.end()))
+		return;
+	if (mode == "+o")
+		_isOperatorsOnly = true;
+	else
+		_isOperatorsOnly = false;
 }
 
 void Channel::broadcastMessage(const std::string& message, int sender_fd) // Broadcast message to all members

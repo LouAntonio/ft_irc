@@ -1,14 +1,14 @@
-/******************************************************************************/
+/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/24 12:03:08 by hmateque          #+#    #+#             */
-/*   Updated: 2026/01/30 12:25:10 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/02/03 11:43:09 by lantonio         ###   ########.fr       */
 /*                                                                            */
-/******************************************************************************/
+/* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
 
@@ -33,6 +33,7 @@ std::string Server::_parsing(const std::string& msg, int sender_fd)
 	if (request.command == "PRIVMSG") return _privmsg(request, sender_fd);
 	if (request.command == "KICK") return _kick(request, sender_fd);
 	if (request.command == "TOPIC") return _topic(request, sender_fd);
+	if (request.command == "MODE") return _mode(request, sender_fd);
 	if (request.command == "HELP" || request.command == "H") return _printHelpInfo(sender_fd);
 
 	// Resposta padrão RFC para comando desconhecido (421)

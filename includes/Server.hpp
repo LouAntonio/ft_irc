@@ -60,6 +60,7 @@ class Server
 		std::string _invite(commandRequest& request, int fd);
 		std::string _kick(commandRequest& request, int fd);
 		std::string	_topic(commandRequest& request, int sender_fd);
+		std::string	_mode(commandRequest& request, int sender_id);
 
 		//verificadores
 		bool isValidChannelName(const std::string& name);
