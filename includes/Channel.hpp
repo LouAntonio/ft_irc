@@ -6,7 +6,7 @@
 /*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:15:54 by hmateque          #+#    #+#             */
-/*   Updated: 2026/02/03 12:13:48 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/04 12:12:21 by lantonio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ class Channel
 		std::map<int, Client *>			_members;
 		std::map<int, Client *>			_operators;
 		bool							_hasTopic;
+		bool							_hasLimit;
+		bool							_hasKey;
 		bool							_isInviteOnly;
 		bool							_isOperatorsOnly;
 		bool							_hasPassword;
@@ -70,7 +72,7 @@ class Channel
 		void							setHasPassword(void);
 		void							setBannedMember(Client* member);
 		void							setTopic(int member_id, std::string topic);
-		void							setIsOperatorsOnly(int member_id, std::string mode, std::string nick);
+		void							setIsOperatorsOnly(int member_id, std::string mode);
 	   // void setInvitedMember(Client* member);
 
 		// Verification

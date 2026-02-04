@@ -6,7 +6,7 @@
 /*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:45:21 by hmateque          #+#    #+#             */
-/*   Updated: 2026/02/03 12:55:40 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/04 12:19:22 by lantonio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ Channel::Channel(const std::string& channelName, Client* creator)
 	_topic = "";
 	_hasTopic = false;
 	_isOperatorsOnly = false;
+	_hasKey = false;
+	_hasLimit = false;
 	_operators.insert(std::pair<int, Client*>(creator->getClientfd(), creator));
 	_members.insert(std::pair<int, Client*>(creator->getClientfd(), creator));
 }
@@ -165,20 +167,26 @@ void Channel::setBannedMember(Client* member) // adiciona um membro à lista de 
 
 void    Channel::setTopic(int member_id, std::string topic) { //set a topic to the channel
 	if (!(_members.find(member_id) != _members.end()))
+	{
+		std::cout << "Saindo" << std::endl;
 		return;
+	}
 	if (topic.size() >= 512 || topic.size() <= 0)
+	{
+		std::cout << "Saindo 2" << std::endl;
 		return;
+	}
 	
 	// return if is in +t mode and member is not an operator
 
 	this->_topic = topic;
+	this->_hasTopic = true;
 }
 
-void	Channel::setIsOperatorsOnly(int member_id, std::string mode, std::string nick) {
-	(void)nick;
-	if (!(_operators.find(member_id) != _operators.end()))
+void	Channel::setIsOperatorsOnly(int member_id, std::string mode) {
+	if (!isOperator(member_id))
 		return;
-	if (mode == "+o")
+	if (mode == "+t")
 		_isOperatorsOnly = true;
 	else
 		_isOperatorsOnly = false;

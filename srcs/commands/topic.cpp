@@ -6,7 +6,7 @@
 /*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 09:35:28 by lantonio          #+#    #+#             */
-/*   Updated: 2026/02/04 10:51:36 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/04 12:08:23 by lantonio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,11 @@ std::string	Server::_topic(commandRequest& request, int sender_fd) {
 			if (_channels.find(request.args[0]) != _channels.end() && _channels[request.args[0]]->isMember(sender_fd))
 			{
 				if (_channels[request.args[0]]->getHasTopic())
-					return "localhost 331 * :No topic setted to the channel\r\n";
-				return "localhost 332 * :" + _channels[request.args[0]]->getTopic();
+					return ":localhost 332 " + _clients[sender_fd]->getNickname() + " " + _channels[request.args[0]]->getName() + " :"  + _channels[request.args[0]]->getTopic() + "\r\n";
+				else
+					return ":localhost 331 " + _clients[sender_fd]->getNickname() + " " + request.args[0] + " :No topic is set\r\n";
 			} else
-				return ":localhost 403 * :Non-existent channel\r\n";
+				return ":localhost 403 * :Non-existent channel or user not in it\r\n";
 		}
 
 		if (request.args.size() == 2)
