@@ -6,7 +6,7 @@
 /*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 11:43:50 by lantonio          #+#    #+#             */
-/*   Updated: 2026/02/04 14:07:20 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:25:11 by lantonio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,30 @@ static std::string toggleKey(commandRequest& request, int sender_fd, std::map<in
 }
 
 static std::string toggleLimit(commandRequest& request, int sender_fd, std::map<int, Client*>& clients, std::map<std::string, Channel*>& channels, std::string &modeMsg) {
-	(void)request;
-	(void)sender_fd;
-	(void)clients;
-	(void)channels;
-	(void)modeMsg;
-	return "";
+	if (channels.find(request.args[0]) != channels.end())
+	{
+		if (!channels[request.args[0]]->isMember(sender_fd) || !channels[request.args[0]]->isOperator(sender_fd))
+			return ":localhost 482 " + channels[request.args[0]]->getName() + " :You're not channel operator\r\n";
+
+		if (request.args.size() != 2 && request.args.size() != 3)
+			return ":localhost 461 * :Invalid number of params\r\n";
+
+		if (request.args.size() == 2 && request.args[1] == "-l")
+			channels[request.args[0]]->setLimit(sender_fd, request.args[1], 0);
+		else if (request.args.size() == 3 && request.args[1] == "+l")
+		{
+			int	limit = std::atoi(request.args[2].c_str());
+			if (limit < 0)
+				return ":localhost 471 * :Invalid limit	\r\n";
+			channels[request.args[0]]->setLimit(sender_fd, request.args[1], limit);
+		}
+		else
+			return ":localhost 461 * :Invalid order of parameters\r\n";
+		modeMsg = ":" + clients[sender_fd]->getNickname() + " MODE " + channels[request.args[0]]->getName() + " " + request.args[1] + "\r\n";
+		channels[request.args[0]]->broadcastMessage(modeMsg, sender_fd);
+		return "";
+	}
+	return ":localhost 471 * :Non-existent channel\r\n";
 }
 
 static std::string toggleOperator(commandRequest& request, int sender_fd, std::map<int, Client*>& clients, std::map<std::string, Channel*>& channels, std::string &modeMsg)

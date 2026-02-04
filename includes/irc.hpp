@@ -6,7 +6,7 @@
 /*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/26 13:44:13 by lantonio          #+#    #+#             */
-/*   Updated: 2026/01/26 13:44:33 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:23:08 by lantonio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,5 +30,7 @@
 #include <iostream>
 #include <csignal>
 #include <cerrno>
+
+#include <cstdlib>
 
 #endif

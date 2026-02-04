@@ -6,7 +6,7 @@
 /*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:45:21 by hmateque          #+#    #+#             */
-/*   Updated: 2026/02/04 14:00:27 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:21:59 by lantonio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Channel::Channel(const std::string& channelName, Client* creator)
 	_isOperatorsOnly = false;
 	_hasKey = false;
 	_hasLimit = false;
+	_limit = 0;
 	_operators.insert(std::pair<int, Client*>(creator->getClientfd(), creator));
 	_members.insert(std::pair<int, Client*>(creator->getClientfd(), creator));
 }
@@ -78,6 +79,14 @@ bool	Channel::getIsOperatorsOnly() const { // check if channel is in mode +t
 
 bool	Channel::getHasKey() const {
 	return this->_hasKey;
+}
+
+bool	Channel::getHasLimit() const {
+	return this->_hasLimit;
+}
+
+int		Channel::getLimit() const {
+	return this->_limit;
 }
 
 std::string	Channel::getKey() const {
@@ -216,6 +225,19 @@ void	Channel::setKey(int member_id, std::string mode, std::string key) {
 	{
 		_hasKey = true;
 		_key = key;
+	}
+}
+
+void	Channel::setLimit(int member_id, std::string mode, int limit) {
+	if (!isOperator(member_id))
+		return;
+
+	if (mode == "-l")
+		_hasKey = false;
+	else
+	{
+		_hasKey = true;
+		_limit = limit;
 	}
 }
 

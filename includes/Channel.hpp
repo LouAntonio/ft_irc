@@ -6,7 +6,7 @@
 /*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:15:54 by hmateque          #+#    #+#             */
-/*   Updated: 2026/02/04 13:59:29 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/04 14:16:35 by lantonio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Channel
 		std::map<int, Client *>			_members;
 		std::map<int, Client *>			_operators;
 		std::string						_key;
+		int								_limit;
 		bool							_hasTopic;
 		bool							_hasLimit;
 		bool							_hasKey;
@@ -56,6 +57,8 @@ class Channel
 		bool                     		getHasTopic() const;
 		bool							getIsOperatorsOnly() const;
 		bool							getHasKey() const;
+		bool							getHasLimit() const;
+		int								getLimit() const;
 		std::string						getKey() const;
 		std::string                     getTopic() const;
 
@@ -77,6 +80,7 @@ class Channel
 		void							setTopic(int member_id, std::string topic);
 		void							setIsOperatorsOnly(int member_id, std::string mode);
 		void							setKey(int member_id, std::string mode, std::string key);
+		void							setLimit(int member_id, std::string mode, int limit);
 	   // void setInvitedMember(Client* member);
 
 		// Verification
