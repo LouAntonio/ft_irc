@@ -21,8 +21,7 @@ std::string Server::_kick(commandRequest& request, int fd)
         return ":localhost 442 " + _clients[fd]->getNickname() + " " + channel + " :You're not on that channel\r\n";
 
     if (!_channels[channel]->isOperator(fd))
-        return "";  
-    //return ":localhost 482 " + _clients[fd]->getNickname() + " " + channel + " :You're not operator\r\n";
+        return ":localhost 482 " + _clients[fd]->getNickname() + " " + channel + " :You're not operator\r\n";
 
     int kick_fd = -1;
 
