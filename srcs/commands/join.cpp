@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/30 12:17:26 by hmateque          #+#    #+#             */
-/*   Updated: 2026/02/12 11:11:16 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/02/12 16:21:11 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -77,6 +77,16 @@ std::string Server::_joinChannel(commandRequest& request, int fd)
             return ":localhost 475 " + nick + " " + channelName + " :Cannot join channel (+k) - bad key\r\n";
         
         if (password != _channels[channelName]->getChannelPassword())
+            return ":localhost 475 " + nick + " " + channelName + " :Cannot join channel (+k) - bad key\r\n";
+    }
+
+    // Verificar key do canal (definida por MODE +k)
+    if (_channels[channelName]->getHasKey())
+    {
+        if (password.empty())
+            return ":localhost 475 " + nick + " " + channelName + " :Cannot join channel (+k) - bad key\r\n";
+        
+        if (password != _channels[channelName]->getKey())
             return ":localhost 475 " + nick + " " + channelName + " :Cannot join channel (+k) - bad key\r\n";
     }
 

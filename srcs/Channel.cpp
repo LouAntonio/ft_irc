@@ -6,7 +6,7 @@
 /*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/22 10:45:21 by hmateque          #+#    #+#             */
-/*   Updated: 2026/02/12 11:11:16 by hmateque         ###   ########.fr       */
+/*   Updated: 2026/02/12 16:28:45 by hmateque         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -217,9 +217,9 @@ void	Channel::setIsOperatorsOnly(int member_id, std::string mode)
 {
 	if (!isOperator(member_id))
 		return;
-	if (mode == "+o")
+	if (mode == "+t")
 		_isOperatorsOnly = true;
-	else if (mode == "-o")
+	else if (mode == "-t")
 		_isOperatorsOnly = false;
 }
 

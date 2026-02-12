@@ -1,14 +1,14 @@
-/* ************************************************************************** */
+/******************************************************************************/
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   topic.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lantonio <lantonio@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hmateque <hmateque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 09:35:28 by lantonio          #+#    #+#             */
-/*   Updated: 2026/02/04 12:08:23 by lantonio         ###   ########.fr       */
+/*   Updated: 2026/02/12 16:21:11 by hmateque         ###   ########.fr       */
 /*                                                                            */
-/* ************************************************************************** */
+/******************************************************************************/
 
 #include "../../includes/irc.hpp"
 #include "../../includes/Server.hpp"
@@ -42,7 +42,9 @@ std::string	Server::_topic(commandRequest& request, int sender_fd) {
 			// channel exists and user is in it
 			if (_channels.find(request.args[0]) != _channels.end() && _channels[request.args[0]]->isMember(sender_fd))
 			{
-				// if channel is in mode +t and user is not an operatorm return 482 
+				// if channel is in mode +t and user is not an operator, return 482
+				if (_channels[request.args[0]]->getIsOperatorsOnly() && !_channels[request.args[0]]->isOperator(sender_fd))
+					return ":localhost 482 " + _clients[sender_fd]->getNickname() + " " + request.args[0] + " :You're not channel operator\r\n";
 				_channels[request.args[0]]->setTopic(sender_fd, request.args[1]);
 				
 				std::string nick = _clients[sender_fd]->getNickname();

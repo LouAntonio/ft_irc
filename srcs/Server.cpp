@@ -72,7 +72,8 @@ void Server::setupSocket(void)
 void Server::run(void)
 {
     signal(SIGINT, handler);
-    signal(SIGQUIT, handler); 
+    signal(SIGQUIT, handler);
+    signal(SIGPIPE, SIG_IGN); 
     std::cout << "Server running in localhost port " << this->_port << std::endl;
     while (g_running)
     {
@@ -169,13 +170,16 @@ std::vector<std::string> Server::_input_builder(Client* client, char *newBuffer,
 	// Adicionar novos dados ao buffer
 	bufferAcumulado.append(newBuffer, bytesRead);
 
-	// Extrair comandos completos (terminados com \r\n)
+	// Extrair comandos completos (terminados com \r\n ou \n)
 	size_t pos;
-	while ((pos = bufferAcumulado.find("\r\n")) != std::string::npos)
+	while ((pos = bufferAcumulado.find("\n")) != std::string::npos)
 	{
 		std::string cmd = bufferAcumulado.substr(0, pos);
+		// Remove trailing \r if present (handles both \r\n and \n)
+		if (!cmd.empty() && cmd[cmd.size() - 1] == '\r')
+			cmd.erase(cmd.size() - 1);
 		comandos.push_back(cmd);
-		bufferAcumulado.erase(0, pos + 2);
+		bufferAcumulado.erase(0, pos + 1);
 	}
 
 	// Atualizar o buffer do cliente com os dados restantes
