@@ -344,7 +344,6 @@ std::string Server::_printHelpInfo(int sender_fd)
 	helpMsg.append(":localhost 371 " + nick + " :\r\n");
 	helpMsg.append(":localhost 371 " + nick + " :Channel Operations:\r\n");
 	helpMsg.append(":localhost 371 " + nick + " :  JOIN <#channel> [key]     - Join a channel (with optional password)\r\n");
-	helpMsg.append(":localhost 371 " + nick + " :  PART <#channel> [reason]  - Leave a channel\r\n");
 	helpMsg.append(":localhost 371 " + nick + " :  TOPIC <#channel> [topic]  - View or set channel topic\r\n");
 	helpMsg.append(":localhost 371 " + nick + " :\r\n");
 	helpMsg.append(":localhost 371 " + nick + " :Messaging:\r\n");

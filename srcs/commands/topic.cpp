@@ -33,7 +33,8 @@ std::string	Server::_topic(commandRequest& request, int sender_fd) {
 					return ":localhost 332 " + _clients[sender_fd]->getNickname() + " " + _channels[request.args[0]]->getName() + " :"  + _channels[request.args[0]]->getTopic() + "\r\n";
 				else
 					return ":localhost 331 " + _clients[sender_fd]->getNickname() + " " + request.args[0] + " :No topic is set\r\n";
-			} else
+			} 
+			else
 				return ":localhost 403 * :Non-existent channel or user not in it\r\n";
 		}
 

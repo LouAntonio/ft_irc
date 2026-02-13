@@ -15,7 +15,6 @@
 
 #include <vector>
 #include <map>
-#include "string"
 
 //server libraries
 #include <poll.h>
@@ -29,7 +28,6 @@
 #include <sys/types.h>
 #include <iostream>
 #include <csignal>
-#include <cerrno>
 
 #include <cstdlib>
 

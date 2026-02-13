@@ -147,17 +147,23 @@ std::string Server::_mode(commandRequest& request, int sender_fd)
 
 	std::string	modeMsg;
 	std::string errorMsg;
+	std::map<std::string, Channel*>::iterator chIt = _channels.find(request.args[0]);
+	if (chIt == _channels.end() || chIt->second == NULL)
+		return ":localhost 403 * :Non-existent channel\r\n";
+	std::map<int, Client*> const &operators = chIt->second->getOperators();
 	
-	if (request.args[1] == "+i" || request.args[1] == "-i")
+	if ((request.args[1] == "+i" || request.args[1] == "-i") && operators.find(sender_fd) != operators.end())
 		errorMsg = toggleInviteOnly(request, sender_fd, _clients, _channels, modeMsg);
-	else if (request.args[1] == "+t" || request.args[1] == "-t")
+	else if ((request.args[1] == "+t" || request.args[1] == "-t") && operators.find(sender_fd) != operators.end())
 		errorMsg = toggleRestrictMode(request, sender_fd, _clients, _channels, modeMsg);
-	else if (request.args[1] == "+k" || request.args[1] == "-k")
+	else if ((request.args[1] == "+k" || request.args[1] == "-k") && operators.find(sender_fd) != operators.end())
 		errorMsg = toggleKey(request, sender_fd, _clients, _channels, modeMsg);
-	else if (request.args[1] == "+o" || request.args[1] == "-o")
+	else if ((request.args[1] == "+o" || request.args[1] == "-o") && operators.find(sender_fd) != operators.end())
 		errorMsg = toggleOperator(request, sender_fd, _clients, _channels, modeMsg);
-	else if (request.args[1] == "+l" || request.args[1] == "-l")
+	else if ((request.args[1] == "+l" || request.args[1] == "-l") && operators.find(sender_fd) != operators.end())
 		errorMsg = toggleLimit(request, sender_fd, _clients, _channels, modeMsg);
+	else if (operators.find(sender_fd) == operators.end())
+		return ":localhost 482 " + chIt->second->getName() + " :You're not channel operator\r\n";
 	else
 		return ":localhost 501 * :Unknown MODE flag " + request.args[1] + "\r\n";
 	
@@ -165,7 +171,7 @@ std::string Server::_mode(commandRequest& request, int sender_fd)
 		return errorMsg;
 
 	if (!modeMsg.empty()) {
-		std::map<int, Client*> const &members = _channels[request.args[0]]->getMembers();
+		std::map<int, Client*> const &members = chIt->second->getMembers();
 		std::map<int, Client*>::const_iterator it;
 		for (it = members.begin(); it != members.end(); ++it)
 		{

@@ -56,5 +56,10 @@ std::string Server::_kick(commandRequest& request, int fd)
     // 7. Efetuar a remoção
     chan->removeMember(target_fd);
 
+    const std::map<int, Client*>& ops = chan->getOperators();
+    if (ops.empty() && !members.empty())
+    {
+        chan->addOperator(members.begin()->second);
+    }
     return "";
 }
